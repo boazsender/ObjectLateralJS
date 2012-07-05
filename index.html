@@ -1,1 +1,188 @@
-My GitHub Page
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>ObjectLateralJS</title>
+
+  <script type="text/javascript" src="object-lateral.js"></script>
+
+  <style type="text/css">
+    body{text-align: center; background-color: #fff;font-size: 1.6em;font-family: Georgia}
+    #content{margin: 0 auto; width: 950px; text-align: left;}
+    p{font-family: "myriad pro", myriad}
+    .alt{color: #333;font-size: .6em; font-family: Baskerville,"Warnock Pro","Goudy Old Style","Palatino","Book Antiqua",Georgia,serif; font;font-style: italic}
+    pre{font-family: Courier, monospace;font-size: .7em;overflow-x: scroll;background: #eee;padding: 10px;}
+    a {text-decoration: none;color: #000099}
+  </style>
+</head>
+<body>
+<div id="content">
+<h1>Description:</h1>
+<p>Literally pass your strings into objects, laterally, with ObjectLateral.js. To see it in action on this page, open <a href="http://getfirebug.com">Firebug</a> and reload.</p>
+
+<p>
+Additionally, we're open to changing the ObjectLateral.js project to something else entirely. Please email suggestions to: rick at bocoup dot com. Suggestion box coming soon (sweet couchdb app! )
+</p>
+<hr>
+<h2>Usage:</h2>
+<p>var string       = "{ A: { pet:'dog', aArr: ['i', 'am', 'an', 'array'] }, B:{ pet:'cat', bObj: { a: 'foo', b:'bar', c:'baz' } },C:{ pet:'dinosaur', cMeth: function() { return 'a method' } }}"; 
+</p>
+
+<hr>
+
+<h2>Git:</h2>
+<p>
+  <a href="http://github.com/rwldrn/ObjectLateralJS">http://github.com/rwldrn/ObjectLateralJS</a> | git://github.com/rwldrn/ObjectLateralJS.git
+</p>
+<hr>
+
+<h2>Source:</h2>
+
+<pre>
+(function () {
+  var ObjectLateral = function () {}, 
+      Lateral;
+
+  ObjectLateral.prototype = {
+    /**
+      Private Methods
+    */
+    _inArray: function( arg, _arr ) {
+      var i = 0, _len = _arr.length;
+      for ( ; i < _len; i++ ) {
+        if ( _arr.indexOf(arg) >= 0 ) {
+          return true; // || index?
+        }        
+      }
+      return false;
+    },
+    _unique: function(_arr) {
+      var i = 0, _len = _arr.length, _ret = [];
+      for ( ; i < _len; i++ ) {
+        if ( !this._inArray(_arr[i], _ret) ) {
+          _ret.push(_arr[i]);
+        }          
+      }        
+      return _ret;
+    },
+    _merge: function( _a, _b ) {
+      var i = 0, _len = _b.length;
+
+      for ( ; i < _len ; i++ ) {
+        _a.push(_b[i]);
+      }
+      return this._unique(_a);
+    },
+    _extend:   function(_obj, _new) { 
+      for (var _n in _new) { 
+        if (_new.hasOwnProperty(_n)) { 
+          var _nProp  = _new[_n],
+              _oProp  = _obj[_n]; 
+        } 
+        _obj[_n] = (_oProp && typeof _nProp == 'object' && typeof _oProp == 'object') ? 
+                      this._merge(_oProp, _nProp) : _nProp; 
+      } 
+      return _obj; 
+    },
+    _parser:  function  (_str) {
+      //  Even scarier then before.
+      var _arr  = eval('[' + _str + ']'), i = 0, _len = _arr.length, _ret  = {};  
+      //  It's especially great because it doesnt waste ANY time checking ANYTHING ;)
+
+      for ( ; i < _len; i++ ) {
+        this._extend(_ret, _arr[i]);
+      }
+      return _ret;
+    },
+    /**
+      Public Methods
+    */
+    //  Convert a string into an object... duh.
+    toObject: function (_str) {
+      return this._parser(_str);
+    },
+    //  Merge two objects... n00b.
+    extendLaterals: function(_objA, _objB) {
+      return this._extend(_objA, _objB);
+    },
+    eventLateral:   function (_evt, _el, _obj) {
+      //maybe this could suck less...
+      var siblings  = _el.parentNode.childNodes, 
+          i         = 0, 
+          _len      = siblings.length, 
+          _lateralTag   = _el.tagName;
+      
+      
+      for(  ; i<_len; i++) {
+        if ( _lateralTag == siblings[i].tagName) {
+          siblings[i].addEventListener(_evt, function (e) {
+            if ( e.target.tagName == _el.tagName && e.target !== _el ) {
+              this.lateral  = objectA;
+              
+              //  This crap is for demo purpose only. whatever.
+              console.group('Object laterally passed to:');
+              console.log(this);
+              console.log('Right click the above element and click "Inspect in DOM tab, scroll down to the "lateral" member');
+              console.log(this.lateral);
+              console.log('Click the element above to view the contents of the "lateral" member in the DOM tab');
+              //console.log('Right click the above element and click "Inspect in DOM tab, scroll down to the "lateral" member');
+              console.groupEnd();
+            }
+    
+          }, false);
+          
+        }
+      }
+    },
+    toss: function (_evt, _el, _obj) {
+      return this.eventLateral(_evt, _el, _obj);
+    }
+  };
+  window.Lateral = new ObjectLateral();
+})();
+
+//  USAGE:
+//  A string... Pointlessly formatted as JSON... But who cares, its just for fun right?
+//  after all, this is just a crummy json parser wanna-be.
+var string       = "{ A: { pet:'dog', aArr: ['i', 'am', 'an', 'array'] }, B:{ pet:'cat', bObj: { a: 'foo', b:'bar', c:'baz' } },C:{ pet:'dinosaur', cMeth: function() { return 'a method' } }}"; 
+//  http://getfirebug.com or go home.
+console.log( Lateral.toObject(string) );
+
+
+NEW:
+var objectA = { foo:'bar' }, 
+    objectB = { zoo:'baz' };
+
+console.log( Lateral.extendLaterals(objectA, objectB) );
+
+
+NEWER:
+document.addEventListener('DOMContentLoaded', function () {
+  
+  var pres  = document.getElementsByTagName('pre');
+  for( var i = 0, _len = pres.length; i<_len; i++ ) {
+    Lateral.eventLateral('click', pres[i], objectA);
+  }
+}, false);
+
+console.log('Click anywhere in the light blue code sections to pass some objects around laterally!');
+</pre>
+<pre>
+</pre>
+
+
+</div>
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-1464992-23");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+
+</body>
+</html>
